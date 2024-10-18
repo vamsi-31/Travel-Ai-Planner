@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelAI - Your Intelligent Travel Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5a623;
+            --background-color: #f4f7f9;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        .form-container, .itinerary-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .interests-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .interest-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #e09400;
+        }
+
+        #itinerary {
+            white-space: pre-wrap;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>TravelAI - Your Intelligent Travel Planner</h1>
+    </header>
+    <div class="container">
+        <div class="form-container">
+            <form id="travelForm">
+                <label for="destination">Destination:</label>
+                <input type="text" id="destination" required>
+
+                <label for="duration">Duration (days):</label>
+                <input type="number" id="duration" required min="1">
+
+                <label for="budget">Budget:</label>
+                <input type="text" id="budget" required>
+
+                <label for="season">Season:</label>
+                <select id="season" required>
+                    <option value="spring">Spring</option>
+                    <option value="summer">Summer</option>
+                    <option value="fall">Fall</option>
+                    <option value="winter">Winter</option>
+                </select>
+
+                <label for="pace">Preferred Pace:</label>
+                <select id="pace" required>
+                    <option value="relaxed">Relaxed</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="fast-paced">Fast-paced</option>
+                </select>
+
+                <label>Interests:</label>
+                <div class="interests-container">
+                    <div class="interest-item">
+                        <input type="checkbox" id="cultural" value="cultural">
+                        <label for="cultural">Cultural</label>
+                    </div>
+                    <div class="interest-item">
+                        <input type="checkbox" id="adventure" value="adventure">
+                        <label for="adventure">Adventure</label>
+                    </div>
+                    <div class="interest-item">
+                        <input type="checkbox" id="relaxation" value="relaxation">
+                        <label for="relaxation">Relaxation</label>
+                    </div>
+                    <div class="interest-item">
+                        <input type="checkbox" id="food" value="food">
+                        <label for="food">Food & Drink</label>
+                    </div>
+                    <div class="interest-item">
+                        <input type="checkbox" id="nature" value="nature">
+                        <label for="nature">Nature</label>
+                    </div>
+                </div>
+
+                <label for="notes">Additional Notes:</label>
+                <textarea id="notes" rows="4"></textarea>
+
+                <button type="submit">Generate Itinerary</button>
+            </form>
+        </div>
+
+        <div class="itinerary-container" style="display: none;">
+            <h2>Your Personalized Itinerary</h2>
+            <div id="itinerary"></div>
+        </div>
+
+        <div class="loading" style="display: none;">
+            Generating your personalized itinerary... Please wait.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('travelForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                destination: document.getElementById('destination').value,
+                duration: document.getElementById('duration').value,
+                budget: document.getElementById('budget').value,
+                season: document.getElementById('season').value,
+                pace: document.getElementById('pace').value,
+                interests: Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value),
+                notes: document.getElementById('notes').value
+            };
+
+            document.querySelector('.loading').style.display = 'block';
+            document.querySelector('.itinerary-container').style.display = 'none';
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/generate_itinerary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                document.getElementById('itinerary').innerHTML = marked.parse(data.itinerary);
+                document.querySelector('.itinerary-container').style.display = 'block';
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                document.querySelector('.loading').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
