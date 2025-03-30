@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TravelAI - Your Intelligent Travel Planner</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
@@ -12,200 +12,410 @@
             --secondary-color: #f5a623;
             --background-color: #f4f7f9;
             --text-color: #333;
+            --white-color: #ffffff;
+            --error-color: #d9534f;
+            --border-color: #ddd;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --spinner-color: var(--secondary-color);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
+            line-height: 1.7; /* Slightly increased line-height */
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+            max-width: 900px; /* Slightly reduced max-width for better readability */
+            margin: 2rem auto;
+            padding: 0 1rem; /* Add horizontal padding for smaller screens */
         }
 
         header {
-            background-color: var(--primary-color);
-            color: white;
+            background: linear-gradient(135deg, var(--primary-color), #3a7bc8); /* Subtle gradient */
+            color: var(--white-color);
             text-align: center;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
+            padding: 2.5rem 1rem;
+            margin-bottom: 2.5rem;
+            border-radius: 0 0 10px 10px; /* Rounded bottom corners */
+            box-shadow: 0 4px 10px var(--shadow-color);
         }
 
-        h1 {
+        header h1 {
             margin: 0;
-            font-size: 2.5rem;
+            font-size: 2.2rem; /* Adjusted size */
+            font-weight: 700;
         }
+        header p {
+            margin-top: 0.5rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
 
         .form-container, .itinerary-container {
-            background-color: white;
+            background-color: var(--white-color);
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px var(--shadow-color);
             padding: 2rem;
             margin-bottom: 2rem;
+            transition: all 0.3s ease-in-out;
         }
 
         form {
             display: grid;
-            gap: 1rem;
+            gap: 1.5rem; /* Increased gap */
+        }
+
+        /* Grouping labels and inputs for better structure if needed */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         label {
             font-weight: 600;
+            color: #555; /* Slightly softer label color */
         }
 
-        input[type="text"], input[type="number"], select, textarea {
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
             width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
+            padding: 0.75rem; /* Increased padding */
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        /* Enhance focus visibility for accessibility */
+        *:focus-visible {
+             outline: 3px solid var(--secondary-color);
+             outline-offset: 2px;
+        }
+
+
+        .interests-label {
+            margin-bottom: 0.5rem; /* Add space below the main label */
+        }
         .interests-container {
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
+            padding: 0.5rem 0; /* Add padding around checkboxes */
         }
 
         .interest-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            background-color: #f9f9f9;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            cursor: pointer; /* Make the whole item clickable */
         }
 
-        button {
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 4px;
+        .interest-item input[type="checkbox"] {
+           width: auto; /* Override default width */
+           accent-color: var(--primary-color);
+           cursor: pointer;
+        }
+       .interest-item label {
+            font-weight: 400; /* Lighter weight for checkbox labels */
+            color: var(--text-color);
             cursor: pointer;
-            transition: background-color 0.3s ease;
         }
 
-        button:hover {
+        .interest-item:has(input:checked) { /* Style parent when checked */
+             background-color: #e7f0fe;
+             border-color: var(--primary-color);
+        }
+        .interest-item:hover {
+            background-color: #f0f0f0;
+        }
+
+
+        button[type="submit"] {
+            background-color: var(--secondary-color);
+            color: var(--white-color);
+            border: none;
+            padding: 0.9rem 2rem; /* Adjusted padding */
+            font-size: 1.1rem; /* Slightly larger font */
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            justify-self: start; /* Align button to the start */
+        }
+
+        button[type="submit"]:hover {
             background-color: #e09400;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        button[type="submit"]:active {
+             transform: translateY(1px);
         }
 
-        #itinerary {
-            white-space: pre-wrap;
+        button[type="submit"]:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
-        .loading {
+        #itinerary-output {
+            margin-top: 1.5rem; /* Add space above content */
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+         /* Styling for generated Markdown content */
+        #itinerary-output h1,
+        #itinerary-output h2,
+        #itinerary-output h3 {
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            color: var(--primary-color);
+        }
+        #itinerary-output h2 { font-size: 1.5rem;}
+        #itinerary-output h3 { font-size: 1.3rem;}
+        #itinerary-output p { margin-bottom: 1em; }
+        #itinerary-output ul, #itinerary-output ol { margin-left: 1.5em; margin-bottom: 1em; }
+        #itinerary-output li { margin-bottom: 0.5em; }
+        #itinerary-output strong { font-weight: 600; }
+        #itinerary-output a { color: var(--secondary-color); text-decoration: none; }
+        #itinerary-output a:hover { text-decoration: underline; }
+        #itinerary-output code {
+            background-color: #eef1f3;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        #itinerary-output pre {
+             background-color: #eef1f3;
+             padding: 1em;
+             border-radius: 5px;
+             overflow-x: auto; /* Handle long code lines */
+         }
+
+        .loading-container { /* Changed from .loading for clarity */
             text-align: center;
-            font-size: 1.2rem;
-            margin-top: 2rem;
+            padding: 2rem;
+            display: none; /* Hide by default */
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--spinner-color);
+            animation: spin 1s ease infinite;
+            margin: 0 auto 1rem; /* Center and add space below */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: var(--error-color);
+            border: 1px solid #f5c6cb;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1.5rem;
+            display: none; /* Hide by default */
+            text-align: center;
         }
 
         @media (max-width: 768px) {
             .container {
-                padding: 1rem;
+                margin: 1rem auto;
+                padding: 0 0.5rem;
             }
-
-            form {
-                grid-template-columns: 1fr;
-            }
+            header { padding: 2rem 1rem; margin-bottom: 1.5rem;}
+            header h1 { font-size: 1.8rem; }
+             .form-container, .itinerary-container { padding: 1.5rem; }
+             form { gap: 1rem; }
+             button[type="submit"] { width: 100%; text-align: center; } /* Full width button on mobile */
+             .interests-container { gap: 0.5rem; }
+             .interest-item { padding: 0.4rem 0.8rem; }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>TravelAI - Your Intelligent Travel Planner</h1>
+        <h1>TravelAI</h1>
+        <p>Your Intelligent Travel Planner</p>
     </header>
-    <div class="container">
-        <div class="form-container">
+
+    <main class="container">
+        <section class="form-container" aria-labelledby="form-heading">
+            <h2 id="form-heading" style="margin-bottom: 1.5rem; font-weight: 600;">Plan Your Next Adventure</h2>
             <form id="travelForm">
-                <label for="destination">Destination:</label>
-                <input type="text" id="destination" required>
+                <div class="form-group">
+                    <label for="destination">Destination:</label>
+                    <input type="text" id="destination" required placeholder="e.g., Tokyo, Japan">
+                </div>
 
-                <label for="duration">Duration (days):</label>
-                <input type="number" id="duration" required min="1">
+                <div class="form-group">
+                    <label for="duration">Duration (days):</label>
+                    <input type="number" id="duration" required min="1" placeholder="e.g., 7">
+                </div>
 
-                <label for="budget">Budget:</label>
-                <input type="text" id="budget" required>
+                <div class="form-group">
+                    <label for="budget">Budget:</label>
+                    <input type="text" id="budget" required placeholder="e.g., 2000 USD, Moderate, Luxury">
+                </div>
 
-                <label for="season">Season:</label>
-                <select id="season" required>
-                    <option value="spring">Spring</option>
-                    <option value="summer">Summer</option>
-                    <option value="fall">Fall</option>
-                    <option value="winter">Winter</option>
-                </select>
+                <div class="form-group">
+                    <label for="season">Season/Month:</label>
+                    <input type="text" id="season" required placeholder="e.g., Spring, July">
+                    <!-- Or use select:
+                    <select id="season" required>
+                        <option value="" disabled selected>Select a season</option>
+                        <option value="spring">Spring</option>
+                        <option value="summer">Summer</option>
+                        <option value="fall">Fall</option>
+                        <option value="winter">Winter</option>
+                    </select>
+                    -->
+                </div>
 
-                <label for="pace">Preferred Pace:</label>
-                <select id="pace" required>
-                    <option value="relaxed">Relaxed</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="fast-paced">Fast-paced</option>
-                </select>
+                <div class="form-group">
+                    <label for="pace">Preferred Pace:</label>
+                    <select id="pace" required>
+                        <option value="" disabled selected>Select your pace</option>
+                        <option value="relaxed">Relaxed</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="fast-paced">Fast-paced</option>
+                    </select>
+                </div>
 
-                <label>Interests:</label>
-                <div class="interests-container">
-                    <div class="interest-item">
-                        <input type="checkbox" id="cultural" value="cultural">
-                        <label for="cultural">Cultural</label>
-                    </div>
-                    <div class="interest-item">
-                        <input type="checkbox" id="adventure" value="adventure">
-                        <label for="adventure">Adventure</label>
-                    </div>
-                    <div class="interest-item">
-                        <input type="checkbox" id="relaxation" value="relaxation">
-                        <label for="relaxation">Relaxation</label>
-                    </div>
-                    <div class="interest-item">
-                        <input type="checkbox" id="food" value="food">
-                        <label for="food">Food & Drink</label>
-                    </div>
-                    <div class="interest-item">
-                        <input type="checkbox" id="nature" value="nature">
-                        <label for="nature">Nature</label>
+                <div class="form-group">
+                    <label class="interests-label">Interests (select at least one):</label>
+                    <div class="interests-container" role="group" aria-labelledby="interests-label">
+                        <div class="interest-item">
+                            <input type="checkbox" id="cultural" value="cultural sites and history"> <label for="cultural">Cultural/History</label>
+                        </div>
+                        <div class="interest-item">
+                            <input type="checkbox" id="adventure" value="adventure and outdoor activities"> <label for="adventure">Adventure/Outdoors</label>
+                        </div>
+                        <div class="interest-item">
+                            <input type="checkbox" id="relaxation" value="relaxation and wellness"> <label for="relaxation">Relaxation</label>
+                        </div>
+                        <div class="interest-item">
+                            <input type="checkbox" id="food" value="local food and drink experiences"> <label for="food">Food & Drink</label>
+                        </div>
+                        <div class="interest-item">
+                            <input type="checkbox" id="nature" value="nature and wildlife"> <label for="nature">Nature/Wildlife</label>
+                        </div>
+                        <div class="interest-item">
+                           <input type="checkbox" id="nightlife" value="nightlife and entertainment"> <label for="nightlife">Nightlife</label>
+                        </div>
+                         <div class="interest-item">
+                           <input type="checkbox" id="shopping" value="shopping"> <label for="shopping">Shopping</label>
+                        </div>
                     </div>
                 </div>
 
-                <label for="notes">Additional Notes:</label>
-                <textarea id="notes" rows="4"></textarea>
+                <div class="form-group">
+                    <label for="notes">Additional Notes or Preferences:</label>
+                    <textarea id="notes" rows="4" placeholder="e.g., Traveling with family, prefer museums over galleries, must visit X location..."></textarea>
+                </div>
 
-                <button type="submit">Generate Itinerary</button>
+                <button type="submit" id="submitButton">Generate Itinerary</button>
             </form>
-        </div>
+        </section>
 
-        <div class="itinerary-container" style="display: none;">
-            <h2>Your Personalized Itinerary</h2>
-            <div id="itinerary"></div>
-        </div>
-
-        <div class="loading" style="display: none;">
+        <!-- Loading Indicator -->
+        <div class="loading-container" id="loadingIndicator" role="status" aria-live="polite">
+            <div class="spinner"></div>
             Generating your personalized itinerary... Please wait.
         </div>
-    </div>
+
+        <!-- Error Message Area -->
+        <div class="error-message" id="errorMessage" role="alert"></div>
+
+        <!-- Itinerary Display Area -->
+        <section class="itinerary-container" id="itineraryContainer" style="display: none;" aria-live="polite">
+            <h2>Your Personalized Itinerary</h2>
+            <div id="itinerary-output"></div>
+        </section>
+
+    </main>
+
+    <footer>
+        <!-- Optional Footer -->
+       <!-- <p style="text-align: center; margin: 2rem 0; font-size: 0.9rem; color: #777;">Powered by TravelAI</p> -->
+    </footer>
 
     <script>
-        document.getElementById('travelForm').addEventListener('submit', async (e) => {
+        const travelForm = document.getElementById('travelForm');
+        const submitButton = document.getElementById('submitButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const itineraryContainer = document.getElementById('itineraryContainer');
+        const itineraryOutput = document.getElementById('itinerary-output');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Use relative URL assuming frontend and backend are served from the same origin
+        // Or use an environment variable in a real deployment
+        const API_ENDPOINT = '/generate_itinerary'; // Changed from absolute URL
+
+        travelForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Basic validation: Check if at least one interest is selected
+            const selectedInterests = document.querySelectorAll('input[type="checkbox"]:checked');
+            if (selectedInterests.length === 0) {
+                 displayError("Please select at least one interest.");
+                 return; // Stop form submission
+            }
+
+
             const formData = {
-                destination: document.getElementById('destination').value,
+                destination: document.getElementById('destination').value.trim(),
                 duration: document.getElementById('duration').value,
-                budget: document.getElementById('budget').value,
-                season: document.getElementById('season').value,
+                budget: document.getElementById('budget').value.trim(),
+                season: document.getElementById('season').value.trim(),
                 pace: document.getElementById('pace').value,
-                interests: Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value),
-                notes: document.getElementById('notes').value
+                interests: Array.from(selectedInterests).map(cb => cb.value),
+                notes: document.getElementById('notes').value.trim()
             };
 
-            document.querySelector('.loading').style.display = 'block';
-            document.querySelector('.itinerary-container').style.display = 'none';
+            // --- UI Updates: Start Loading ---
+            submitButton.disabled = true;
+            submitButton.textContent = 'Generating...';
+            loadingIndicator.style.display = 'block';
+            itineraryContainer.style.display = 'none'; // Hide previous results
+            errorMessage.style.display = 'none'; // Hide previous errors
 
             try {
-                const response = await fetch('http://127.0.0.1:5000/generate_itinerary', {
+                const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -213,19 +423,57 @@
                     body: JSON.stringify(formData),
                 });
 
-                const data = await response.json();
-                if (data.error) {
-                    throw new Error(data.error);
+                // Check if response is ok (status in the range 200-299)
+                if (!response.ok) {
+                    // Try to parse error message from backend, otherwise use status text
+                    let errorData;
+                    try {
+                         errorData = await response.json();
+                    } catch (parseError) {
+                         // Ignore if response is not JSON
+                    }
+                    const errorMsg = errorData?.error || `HTTP error! Status: ${response.status} ${response.statusText}`;
+                    throw new Error(errorMsg);
                 }
 
-                document.getElementById('itinerary').innerHTML = marked.parse(data.itinerary);
-                document.querySelector('.itinerary-container').style.display = 'block';
+                const data = await response.json();
+
+                if (data.error) { // Handle application-specific errors if backend sends them this way
+                     throw new Error(data.error);
+                }
+
+                 // --- UI Updates: Display Results ---
+                if (data.itinerary) {
+                    // Use DOMPurify here if you want extra security against XSS in markdown
+                    // import DOMPurify from 'dompurify';
+                    // itineraryOutput.innerHTML = DOMPurify.sanitize(marked.parse(data.itinerary));
+                    itineraryOutput.innerHTML = marked.parse(data.itinerary); // Using marked directly
+                    itineraryContainer.style.display = 'block';
+                    itineraryContainer.scrollIntoView({ behavior: 'smooth' }); // Scroll to results
+                } else {
+                    throw new Error("Received empty itinerary from server.");
+                }
+
             } catch (error) {
-                alert(`Error: ${error.message}`);
+                console.error("Error generating itinerary:", error);
+                displayError(`Failed to generate itinerary: ${error.message}`);
             } finally {
-                document.querySelector('.loading').style.display = 'none';
+                 // --- UI Updates: End Loading ---
+                submitButton.disabled = false;
+                submitButton.textContent = 'Generate Itinerary';
+                loadingIndicator.style.display = 'none';
             }
         });
+
+        function displayError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll to error
+        }
+
+         // Initialize marked - you can add options here if needed
+         // marked.setOptions({ ... });
+
     </script>
 </body>
 </html>
