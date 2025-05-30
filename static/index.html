@@ -199,7 +199,40 @@
             margin-bottom: 0.8em;
             color: var(--primary-color);
         }
-        #itinerary-output h2 { font-size: 1.5rem;}
+        #itinerary-output h2.collapsible-heading { /* Apply only to collapsible H2s */
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: relative;
+            padding-left: 25px; /* Space for toggle icon */
+            margin-bottom: 0.2em; /* Tighter bottom margin for heading */
+        }
+        #itinerary-output h2.collapsible-heading .toggle-icon {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem; /* Adjust icon size */
+            transition: transform 0.2s ease;
+            /* Non-selectable icon */
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10+ */
+            user-select: none; /* Standard */
+        }
+        #itinerary-output h2.collapsible-heading.collapsed .toggle-icon {
+            transform: translateY(-50%) rotate(-90deg);
+        }
+        .day-content {
+            padding-left: 25px; /* Align content with heading text, past the icon */
+            overflow: hidden; 
+            max-height: 0; /* Start collapsed, transition to scrollHeight */
+            transition: max-height 0.35s ease-in-out;
+            margin-bottom: 1em; /* Space after day content block */
+        }
+        .day-content.expanded {
+             /* max-height will be set by JS */
+        }
+
+
         #itinerary-output h3 { font-size: 1.3rem;}
         #itinerary-output p { margin-bottom: 1em; }
         #itinerary-output ul, #itinerary-output ol { margin-left: 1.5em; margin-bottom: 1em; }
@@ -316,8 +349,8 @@
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label class="interests-label">Interests (select at least one):</label>
+                <fieldset class="form-group">
+                    <legend class="interests-label">Interests (select at least one):</legend>
                     <div class="interests-container" role="group" aria-labelledby="interests-label">
                         <div class="interest-item">
                             <input type="checkbox" id="cultural" value="cultural sites and history"> <label for="cultural">Cultural/History</label>
@@ -363,7 +396,10 @@
 
         <!-- Itinerary Display Area -->
         <section class="itinerary-container" id="itineraryContainer" style="display: none;" aria-live="polite">
-            <h2>Your Personalized Itinerary</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                 <h2 id="itineraryMainHeading" style="margin-bottom: 0;">Your Personalized Itinerary</h2>
+                 <button id="copyButton" class="button-secondary" style="display: none;">Copy Itinerary</button>
+            </div>
             <div id="itinerary-output"></div>
         </section>
 
@@ -413,6 +449,13 @@
             loadingIndicator.style.display = 'block';
             itineraryContainer.style.display = 'none'; // Hide previous results
             errorMessage.style.display = 'none'; // Hide previous errors
+            const copyBtn = document.getElementById('copyButton');
+            if(copyBtn) {
+                copyBtn.style.display = 'none'; // Hide copy button initially on new request
+                copyBtn.textContent = 'Copy Itinerary'; // Reset button text
+                copyBtn.disabled = false;
+            }
+
 
             try {
                 const response = await fetch(API_ENDPOINT, {
@@ -444,13 +487,18 @@
 
                  // --- UI Updates: Display Results ---
                 if (data.itinerary) {
-                    // Use DOMPurify here if you want extra security against XSS in markdown
-                    // import DOMPurify from 'dompurify';
-                    // itineraryOutput.innerHTML = DOMPurify.sanitize(marked.parse(data.itinerary));
-                    itineraryOutput.innerHTML = marked.parse(data.itinerary); // Using marked directly
+                    rawItineraryMarkdown = data.itinerary; // Store raw markdown
+                    itineraryOutput.innerHTML = marked.parse(data.itinerary); 
+                    
+                    makeSectionsCollapsible(itineraryOutput); 
+                    
+                    if(copyBtn) copyBtn.style.display = 'inline-block'; // Show copy button
+
                     itineraryContainer.style.display = 'block';
-                    itineraryContainer.scrollIntoView({ behavior: 'smooth' }); // Scroll to results
+                    itineraryContainer.scrollIntoView({ behavior: 'smooth' }); 
                 } else {
+                    rawItineraryMarkdown = ''; 
+                    if(copyBtn) copyBtn.style.display = 'none'; 
                     throw new Error("Received empty itinerary from server.");
                 }
 
@@ -466,14 +514,98 @@
         });
 
         function displayError(message) {
+            rawItineraryMarkdown = ''; 
+            const copyBtn = document.getElementById('copyButton');
+            if(copyBtn) copyBtn.style.display = 'none';
+
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
-            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll to error
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
         }
 
-         // Initialize marked - you can add options here if needed
-         // marked.setOptions({ ... });
+        let rawItineraryMarkdown = ''; // Store raw markdown for copying
 
+        function makeSectionsCollapsible(container) {
+            const mainHeading = document.getElementById('itineraryMainHeading');
+            const headings = container.querySelectorAll('h2, h3'); // Consider h3 as well for day sub-sections if any
+
+            headings.forEach(heading => {
+                // Skip the main itinerary container heading
+                if (heading === mainHeading || (heading.id && heading.id === 'itineraryMainHeading')) {
+                    return;
+                }
+                // Heuristic: if it's an H2 and starts with "Day " or an H3.
+                const isDayHeading = (heading.tagName === 'H2' && heading.textContent.trim().match(/^Day\s*\d+/i));
+                const isPotentialSubHeading = heading.tagName === 'H3'; // H3s are often part of a day's content
+
+                if (!isDayHeading && !isPotentialSubHeading) return; // Only make Day X H2s or H3s collapsible for now
+
+                heading.classList.add('collapsible-heading');
+                const icon = document.createElement('span');
+                icon.classList.add('toggle-icon');
+                icon.textContent = '▶'; // Start collapsed: Pointing right
+                heading.insertBefore(icon, heading.firstChild);
+                heading.classList.add('collapsed'); // Start collapsed
+
+                const contentWrapper = document.createElement('div');
+                contentWrapper.classList.add('day-content');
+                // contentWrapper.style.maxHeight = '0'; // Set by CSS
+
+                let currentElement = heading.nextElementSibling;
+                while (currentElement && !currentElement.classList.contains('collapsible-heading') && currentElement.tagName !== 'H2') {
+                     // Stop if another H2 (likely next day) or another specifically marked collapsible heading
+                    contentWrapper.appendChild(currentElement.cloneNode(true));
+                    const toRemove = currentElement;
+                    currentElement = currentElement.nextElementSibling;
+                    toRemove.remove();
+                }
+                heading.after(contentWrapper);
+
+                heading.addEventListener('click', () => {
+                    const isCurrentlyCollapsed = heading.classList.contains('collapsed');
+                    if (isCurrentlyCollapsed) {
+                        contentWrapper.style.maxHeight = contentWrapper.scrollHeight + 'px';
+                        heading.classList.remove('collapsed');
+                        icon.textContent = '▼'; // Expanded: Pointing down
+                    } else {
+                        contentWrapper.style.maxHeight = '0';
+                        heading.classList.add('collapsed');
+                        icon.textContent = '▶'; // Collapsed: Pointing right
+                    }
+                });
+                 // Trigger reflow for CSS to apply max-height 0 before potential expansion
+                void heading.offsetWidth;
+            });
+        }
+
+        const copyButton = document.getElementById('copyButton');
+        if (copyButton) {
+            copyButton.addEventListener('click', async () => {
+                if (!rawItineraryMarkdown) {
+                    // This case should ideally not happen if button is hidden
+                    alert("No itinerary content available to copy.");
+                    return;
+                }
+                try {
+                    await navigator.clipboard.writeText(rawItineraryMarkdown);
+                    copyButton.textContent = 'Copied!';
+                    copyButton.disabled = true;
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copy Itinerary';
+                        copyButton.disabled = false;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    // Inform user more gracefully
+                    const originalText = copyButton.textContent;
+                    copyButton.textContent = 'Copy Failed!';
+                    setTimeout(() => {
+                         copyButton.textContent = originalText;
+                    }, 2500);
+                }
+            });
+        }
+        // marked.setOptions({ ... }); // Initialize marked if needed
     </script>
 </body>
 </html>
