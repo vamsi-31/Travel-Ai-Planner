@@ -8,15 +8,20 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
-            --primary-color: #4a90e2;
-            --secondary-color: #f5a623;
-            --background-color: #f4f7f9;
-            --text-color: #333;
-            --white-color: #ffffff;
-            --error-color: #d9534f;
-            --border-color: #ddd;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --spinner-color: var(--secondary-color);
+            --theme-primary: #89CFF0; /* Baby Blue */
+            --theme-primary-darker: #77b8d8; /* Slightly darker for hover */
+            --theme-secondary: #B0E0E6; /* Powder Blue */
+            --theme-accent: #5F9EA0; /* Cadet Blue for accents if needed */
+            --theme-background: #f0f8ff; /* AliceBlue - very light */
+            --theme-surface: rgba(255, 255, 255, 0.75); /* Semi-transparent white for "glass" */
+            --theme-text-primary: #2c3e50; /* Dark Slate Gray/Blue */
+            --theme-text-secondary: #566573; /* Lighter Slate Gray */
+            --theme-border: rgba(0, 0, 0, 0.08); /* Very subtle border */
+            --theme-shadow: rgba(44, 62, 80, 0.1); /* Soft shadow */
+            --theme-error: #e74c3c; /* A soft red */
+            --theme-error-bg: rgba(231, 76, 60, 0.1);
+
+            /* Spinner color will use theme-primary */
         }
 
         *, *::before, *::after {
@@ -27,76 +32,95 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.7; /* Slightly increased line-height */
+            background: linear-gradient(170deg, var(--theme-background) 0%, #e6f7ff 100%); /* Subtle gradient */
+            color: var(--theme-text-primary);
+            line-height: 1.6; 
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 900px; /* Slightly reduced max-width for better readability */
+            max-width: 850px; 
             margin: 2rem auto;
-            padding: 0 1rem; /* Add horizontal padding for smaller screens */
+            padding: 0 1rem; 
         }
 
         header {
-            background: linear-gradient(135deg, var(--primary-color), #3a7bc8); /* Subtle gradient */
-            color: var(--white-color);
+            background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary)); 
+            color: var(--theme-text-primary); /* Darker text for light blue background */
             text-align: center;
-            padding: 2.5rem 1rem;
-            margin-bottom: 2.5rem;
-            border-radius: 0 0 10px 10px; /* Rounded bottom corners */
-            box-shadow: 0 4px 10px var(--shadow-color);
+            padding: 2rem 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 12px; 
+            box-shadow: 0 2px 8px var(--theme-shadow);
         }
 
         header h1 {
             margin: 0;
-            font-size: 2.2rem; /* Adjusted size */
-            font-weight: 700;
+            font-size: 2rem; 
+            font-weight: 600; /* Slightly less bold */
         }
         header p {
-            margin-top: 0.5rem;
+            margin-top: 0.4rem;
             font-weight: 300;
-            opacity: 0.9;
+            font-size: 0.95rem;
+            opacity: 0.85;
         }
 
-
         .form-container, .itinerary-container {
-            background-color: var(--white-color);
-            border-radius: 8px;
-            box-shadow: 0 5px 15px var(--shadow-color);
-            padding: 2rem;
-            margin-bottom: 2rem;
-            transition: all 0.3s ease-in-out;
+            background-color: var(--theme-surface);
+            -webkit-backdrop-filter: blur(12px); /* Safari */
+            backdrop-filter: blur(12px); 
+            border-radius: 16px; /* Softer corners */
+            box-shadow: 0 8px 24px var(--theme-shadow); /* More diffused shadow */
+            padding: 2.5rem; /* More padding */
+            margin-bottom: 2.5rem;
+            border: 1px solid var(--theme-border);
+            transition: box-shadow 0.3s ease;
+        }
+        .form-container:hover, .itinerary-container:hover {
+            box-shadow: 0 12px 32px var(--theme-shadow);
         }
 
         form {
             display: grid;
-            gap: 1.5rem; /* Increased gap */
+            gap: 1.25rem; 
         }
 
-        /* Grouping labels and inputs for better structure if needed */
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
-        label {
-            font-weight: 600;
-            color: #555; /* Slightly softer label color */
+        label, .interests-label { /* Target legend as well */
+            font-weight: 500; /* Medium weight */
+            font-size: 0.9rem;
+            color: var(--theme-text-secondary);
         }
+        .interests-label { /* Specific for legend if needed */
+             padding-bottom: 0.2rem;
+        }
+
 
         input[type="text"],
         input[type="number"],
         select,
         textarea {
             width: 100%;
-            padding: 0.75rem; /* Increased padding */
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 1rem;
+            padding: 0.8rem 1rem; 
+            border: 1px solid var(--theme-border);
+            border-radius: 8px; /* Softer radius */
+            font-size: 0.95rem;
             font-family: inherit;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.7); /* Slightly transparent inputs */
+            color: var(--theme-text-primary);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input[type="text"]::placeholder,
+        input[type="number"]::placeholder,
+        textarea::placeholder {
+            color: var(--theme-text-secondary);
+            opacity: 0.8;
         }
 
         input[type="text"]:focus,
@@ -104,169 +128,196 @@
         select:focus,
         textarea:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+            border-color: var(--theme-primary);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-primary) 20%, transparent); /* Subtle focus ring */
+            background-color: rgba(255, 255, 255, 0.9);
         }
 
-        /* Enhance focus visibility for accessibility */
-        *:focus-visible {
-             outline: 3px solid var(--secondary-color);
-             outline-offset: 2px;
+        *:focus-visible { /* General keyboard focus */
+             outline: 2px solid var(--theme-accent);
+             outline-offset: 1px;
         }
 
-
-        .interests-label {
-            margin-bottom: 0.5rem; /* Add space below the main label */
-        }
         .interests-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
-            padding: 0.5rem 0; /* Add padding around checkboxes */
+            gap: 0.75rem;
+            padding-top: 0.25rem; 
         }
 
         .interest-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            background-color: #f9f9f9;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-            cursor: pointer; /* Make the whole item clickable */
+            gap: 0.4rem;
+            background-color: transparent; /* Minimal */
+            padding: 0.6rem 1rem; 
+            border-radius: 20px; /* Pill shape */
+            border: 1px solid var(--theme-border);
+            transition: border-color 0.2s ease, color 0.2s ease;
+            cursor: pointer; 
         }
 
         .interest-item input[type="checkbox"] {
-           width: auto; /* Override default width */
-           accent-color: var(--primary-color);
+           width: auto; 
+           accent-color: var(--theme-primary);
            cursor: pointer;
+           margin-right: 0.2rem;
         }
-       .interest-item label {
-            font-weight: 400; /* Lighter weight for checkbox labels */
-            color: var(--text-color);
+       .interest-item label { /* Label within interest item */
+            font-weight: 400; 
+            color: var(--theme-text-secondary);
+            font-size: 0.85rem;
             cursor: pointer;
         }
 
-        .interest-item:has(input:checked) { /* Style parent when checked */
-             background-color: #e7f0fe;
-             border-color: var(--primary-color);
+        .interest-item:has(input:checked) { 
+             border-color: var(--theme-primary);
+             /* Optional: background-color: color-mix(in srgb, var(--theme-primary) 10%, transparent); */
         }
         .interest-item:hover {
-            background-color: #f0f0f0;
+            border-color: color-mix(in srgb, var(--theme-primary) 70%, var(--theme-border));
         }
 
-
-        button[type="submit"] {
-            background-color: var(--secondary-color);
-            color: var(--white-color);
+        /* General Button Styling */
+        .button-base {
             border: none;
-            padding: 0.9rem 2rem; /* Adjusted padding */
-            font-size: 1.1rem; /* Slightly larger font */
-            font-weight: 600;
-            border-radius: 5px;
+            padding: 0.85rem 1.75rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-            justify-self: start; /* Align button to the start */
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 1px 3px var(--theme-shadow);
         }
-
-        button[type="submit"]:hover {
-            background-color: #e09400;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        .button-base:hover {
+            box-shadow: 0 3px 6px var(--theme-shadow);
+            transform: translateY(-1px);
         }
-        button[type="submit"]:active {
-             transform: translateY(1px);
+        .button-base:active {
+             transform: translateY(0px);
+             box-shadow: 0 1px 2px var(--theme-shadow);
         }
-
-        button[type="submit"]:disabled {
-            background-color: #ccc;
+        .button-base:disabled {
+            background-color: #bdc3c7; /* Muted gray */
+            color: #7f8c8d;
             cursor: not-allowed;
             box-shadow: none;
+            transform: none;
         }
 
+        button[type="submit"] {
+            background-color: var(--theme-primary);
+            color: var(--theme-text-primary); /* Darker text on light blue */
+        }
+        button[type="submit"]:hover {
+            background-color: var(--theme-primary-darker);
+        }
+        
+        /* Secondary button style for Copy button (inherits from button-base) */
+        .button-secondary {
+            background-color: var(--theme-accent); 
+            color: white; /* White text on cadet blue */
+            font-size: 0.85rem; /* Slightly smaller */
+            padding: 0.6rem 1.2rem;
+        }
+        .button-secondary:hover {
+            background-color: color-mix(in srgb, var(--theme-accent) 85%, black);
+        }
+
+
         #itinerary-output {
-            margin-top: 1.5rem; /* Add space above content */
-            border-top: 1px solid var(--border-color);
+            margin-top: 1rem; 
+            border-top: 1px solid var(--theme-border);
             padding-top: 1.5rem;
         }
 
-         /* Styling for generated Markdown content */
-        #itinerary-output h1,
-        #itinerary-output h2,
+        #itinerary-output h1, /* Should not exist here based on structure */
+        #itinerary-output h2, /* For non-collapsible h2 if any */
         #itinerary-output h3 {
-            margin-top: 1.5em;
-            margin-bottom: 0.8em;
-            color: var(--primary-color);
+            margin-top: 1.2em;
+            margin-bottom: 0.6em;
+            color: var(--theme-text-primary); /* Main text color for headings */
         }
-        #itinerary-output h2.collapsible-heading { /* Apply only to collapsible H2s */
-            font-size: 1.5rem;
+
+        #itinerary-output h2.collapsible-heading { 
+            font-size: 1.4rem; /* Slightly smaller */
+            color: var(--theme-primary); /* Theme color for clickable days */
             cursor: pointer;
             position: relative;
-            padding-left: 25px; /* Space for toggle icon */
-            margin-bottom: 0.2em; /* Tighter bottom margin for heading */
+            padding-left: 28px; 
+            margin-bottom: 0.4em; 
         }
         #itinerary-output h2.collapsible-heading .toggle-icon {
             position: absolute;
-            left: 0;
+            left: 0px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 1.1rem; /* Adjust icon size */
+            font-size: 1.2rem; 
             transition: transform 0.2s ease;
-            /* Non-selectable icon */
-            -webkit-user-select: none; /* Safari */
-            -ms-user-select: none; /* IE 10+ */
-            user-select: none; /* Standard */
+            color: var(--theme-primary); /* Icon color */
+            -webkit-user-select: none; 
+            user-select: none; 
         }
         #itinerary-output h2.collapsible-heading.collapsed .toggle-icon {
             transform: translateY(-50%) rotate(-90deg);
         }
         .day-content {
-            padding-left: 25px; /* Align content with heading text, past the icon */
+            padding-left: 28px; 
             overflow: hidden; 
-            max-height: 0; /* Start collapsed, transition to scrollHeight */
-            transition: max-height 0.35s ease-in-out;
-            margin-bottom: 1em; /* Space after day content block */
+            max-height: 0; 
+            transition: max-height 0.3s ease-out; /* Smoother timing */
+            margin-bottom: 0.8em; 
+            border-left: 2px solid var(--theme-border); /* Subtle guide line */
+            margin-left: 10px; /* Align with icon center */
         }
         .day-content.expanded {
-             /* max-height will be set by JS */
+             /* max-height set by JS */
         }
 
-
-        #itinerary-output h3 { font-size: 1.3rem;}
-        #itinerary-output p { margin-bottom: 1em; }
-        #itinerary-output ul, #itinerary-output ol { margin-left: 1.5em; margin-bottom: 1em; }
-        #itinerary-output li { margin-bottom: 0.5em; }
-        #itinerary-output strong { font-weight: 600; }
-        #itinerary-output a { color: var(--secondary-color); text-decoration: none; }
+        #itinerary-output h3 { /* For subheadings within day content */
+            font-size: 1.15rem;
+            color: var(--theme-text-secondary);
+            margin-top: 1em;
+            margin-bottom: 0.4em;
+        }
+        #itinerary-output p { margin-bottom: 0.8em; font-size: 0.9rem; }
+        #itinerary-output ul, #itinerary-output ol { margin-left: 1.2em; margin-bottom: 0.8em; font-size: 0.9rem;}
+        #itinerary-output li { margin-bottom: 0.4em; }
+        #itinerary-output strong { font-weight: 500; } /* Medium weight for strong */
+        #itinerary-output a { 
+            color: var(--theme-accent); 
+            text-decoration: none; 
+            font-weight: 500;
+        }
         #itinerary-output a:hover { text-decoration: underline; }
-        #itinerary-output code {
-            background-color: #eef1f3;
+        #itinerary-output code, #itinerary-output pre {
+            background-color: color-mix(in srgb, var(--theme-secondary) 15%, transparent); /* Very light blue bg */
             padding: 0.2em 0.4em;
-            border-radius: 3px;
-            font-size: 0.9em;
+            border-radius: 4px;
+            font-size: 0.85em;
+            border: 1px solid var(--theme-border);
+            color: var(--theme-text-primary);
         }
         #itinerary-output pre {
-             background-color: #eef1f3;
-             padding: 1em;
-             border-radius: 5px;
-             overflow-x: auto; /* Handle long code lines */
+             padding: 0.8em;
+             overflow-x: auto; 
          }
 
-        .loading-container { /* Changed from .loading for clarity */
+        .loading-container { 
             text-align: center;
             padding: 2rem;
-            display: none; /* Hide by default */
+            display: none; 
+            color: var(--theme-text-secondary);
         }
 
         .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 36px;
-            height: 36px;
+            border: 3px solid rgba(0, 0, 0, 0.05); /* Lighter base */
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            border-left-color: var(--spinner-color);
-            animation: spin 1s ease infinite;
-            margin: 0 auto 1rem; /* Center and add space below */
+            border-left-color: var(--theme-primary); /* Use theme color */
+            animation: spin 0.8s linear infinite; /* Faster spin */
+            margin: 0 auto 1rem; 
         }
 
         @keyframes spin {
@@ -275,28 +326,36 @@
         }
 
         .error-message {
-            background-color: #f8d7da;
-            color: var(--error-color);
-            border: 1px solid #f5c6cb;
+            background-color: var(--theme-error-bg);
+            color: var(--theme-error);
+            border: 1px solid color-mix(in srgb, var(--theme-error) 30%, transparent);
             padding: 1rem;
-            border-radius: 5px;
+            border-radius: 8px; /* Consistent radius */
             margin-top: 1.5rem;
-            display: none; /* Hide by default */
+            display: none; 
             text-align: center;
+            font-size: 0.9rem;
         }
 
         @media (max-width: 768px) {
             .container {
-                margin: 1rem auto;
-                padding: 0 0.5rem;
+                margin: 1.5rem auto; /* Adjusted margin */
+                padding: 0 0.75rem;
             }
-            header { padding: 2rem 1rem; margin-bottom: 1.5rem;}
-            header h1 { font-size: 1.8rem; }
-             .form-container, .itinerary-container { padding: 1.5rem; }
+            header { padding: 1.5rem 1rem; margin-bottom: 1.5rem;}
+            header h1 { font-size: 1.7rem; }
+             .form-container, .itinerary-container { 
+                 padding: 1.5rem; 
+                 margin-bottom: 1.5rem;
+                 border-radius: 12px; /* Slightly smaller radius for mobile */
+             }
              form { gap: 1rem; }
-             button[type="submit"] { width: 100%; text-align: center; } /* Full width button on mobile */
+             button[type="submit"], .button-secondary { width: 100%; text-align: center; } 
              .interests-container { gap: 0.5rem; }
-             .interest-item { padding: 0.4rem 0.8rem; }
+             .interest-item { padding: 0.5rem 0.9rem; }
+             #itinerary-output h2.collapsible-heading { font-size: 1.25rem; padding-left: 24px; }
+             .day-content { padding-left: 24px; margin-left: 8px;}
+             #itinerary-output h3 { font-size: 1.1rem; }
         }
     </style>
 </head>
